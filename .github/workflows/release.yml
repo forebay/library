@@ -1,0 +1,16 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: intisy/workflows/.github/workflows/library.yml@main
+    with:
+      source_dir: .
+      declaration: library.json

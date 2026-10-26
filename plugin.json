@@ -1,0 +1,9 @@
+{
+  "id": "library",
+  "repo": {
+    "role": "C libraries",
+    "category": "core-library",
+    "tech": ["c"],
+    "topics": ["ffi"]
+  }
+}

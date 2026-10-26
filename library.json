@@ -1,0 +1,79 @@
+{
+  "$schema": "https://weivel.github.io/model/library.schema.json",
+  "id": "apps",
+  "version": "0.1.0",
+  "binary": "apps",
+  "release": "apps_release",
+  "services": [
+    {
+      "id": "apps",
+      "functions": [
+        {
+          "name": "list",
+          "symbol": "apps_list",
+          "kind": "json",
+          "context": ["environment", "home"],
+          "argument": { "type": "object" },
+          "result": {
+            "type": "object",
+            "properties": {
+              "apps": {
+                "type": "array",
+                "items": { "$ref": "https://weivel.github.io/model/plugin.schema.json#/definitions/appDescriptor" }
+              }
+            },
+            "required": ["apps"],
+            "additionalProperties": false
+          }
+        },
+        {
+          "name": "get",
+          "symbol": "apps_get",
+          "kind": "json",
+          "context": ["environment", "home"],
+          "argument": {
+            "type": "object",
+            "properties": { "id": { "type": "string" } },
+            "required": ["id"]
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "app": { "$ref": "https://weivel.github.io/model/plugin.schema.json#/definitions/appDescriptor" }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "name": "home",
+          "symbol": "apps_home",
+          "kind": "json",
+          "context": ["environment", "home"],
+          "argument": {
+            "type": "object",
+            "properties": { "id": { "type": "string" } },
+            "required": ["id"]
+          },
+          "result": {
+            "type": "object",
+            "properties": { "home": { "type": "string" } },
+            "additionalProperties": false
+          }
+        },
+        {
+          "name": "current",
+          "symbol": "apps_current",
+          "kind": "json",
+          "context": ["environment", "home", "arguments"],
+          "argument": { "type": "object" },
+          "result": {
+            "type": "object",
+            "properties": { "id": { "type": "string" } },
+            "required": ["id"],
+            "additionalProperties": false
+          }
+        }
+      ]
+    }
+  ]
+}
