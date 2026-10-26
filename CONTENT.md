@@ -102,3 +102,13 @@ shared library, one CTest executable per concern, on Windows and Linux in CI.
 
 A `v*` tag runs `intisy/workflows`' `library.yml`, which builds `apps-linux-x64.so` and
 `apps-win32-x64.dll`, and publishes them with `library.json` and `SHA256SUMS` as a GitHub release.
+
+### Released
+
+| version | commit | asset | SHA-256 |
+| --- | --- | --- | --- |
+| `v0.1.0` | `f870fd9934e4664b1ab61151d6a91b1f9afc23d1` | `apps-linux-x64.so` | `c9fadf1be92669abff11b81a0ac3cf1d1a620b51a785be383a4836d62f9cba16` |
+| | | `apps-win32-x64.dll` | `ab82e9fcce22f5c1e032c924f5deafdbd14421ab2c60026fc7f20165f8f7c59a` |
+| | | `library.json` | `8bc33a51b755b8cb1dd167279fd2a53605c5de909d0150af1982f90177dd8b86` |
+
+A consumer pins these digests: <https://github.com/forebay/library/releases/tag/v0.1.0>.
