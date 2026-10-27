@@ -43,17 +43,6 @@ char *apps_join(const char *first, const char *second);
 /** apps_copy that raises out of memory, so a failed copy can never be read as an answer. */
 char *apps_copy_or_raise(const char *text, apps_error *error);
 
-/**
- * basekit's whole-line comment strip, the multiline regex readJson applies before JSON.parse, on
- * well-formed UTF-8. Freed with free, NULL only when memory runs out.
- *
- * @implNote The regex's whitespace class is JavaScript's, so it also eats a BOM, a no-break space,
- * or earlier lines of nothing but whitespace (a vertical tab included) in front of the comment,
- * and its line start also holds after a CR, U+2028 or U+2029, while the comment itself runs to the
- * next LF only.
- */
-char *apps_strip_comment_lines(const char *text, size_t length, size_t *stripped_length);
-
 /** The registry as basekit's readRaw answers it: an object, empty when absent or malformed; NULL only when memory runs out. */
 cJSON *apps_read_registry(const apps_facts *facts, apps_error *error);
 
