@@ -15,7 +15,8 @@ final class ParityPlugin {
     private AppsService apps;
 
     static ManifestFacts facts() {
-        return new ManifestFacts(ID, 1, null, null, null);
+        return new ManifestFacts(ID, 1, null, null, null)
+                .withServices(Collections.singletonList(AppsService.APPS.id()), null);
     }
 
     static ActivationUnit unit() {
