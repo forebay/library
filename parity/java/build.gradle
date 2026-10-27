@@ -36,16 +36,30 @@ def parityDirectory = file("..")
 def declaration = new File(parityDirectory, "../library.json")
 def generatedTypes = layout.buildDirectory.dir("generated/library-types")
 
-// The service interface is generated from this repository's library.json on every build, the one the
-// pinned release carries, so the test exercises the generator a Java embedder uses.
+def pinFile = new File(parityDirectory, "pin.json")
+
+def sha256Of = { File file ->
+    java.security.MessageDigest.getInstance("SHA-256").digest(file.bytes).collect { String.format("%02x", it & 0xff) }.join()
+}
+
+// The service interface is generated on every build from this repository's library.json, which must
+// be the pinned release's byte for byte, so the test exercises the generator a Java embedder uses on
+// the declaration the library it loads actually carries.
 def generateAppsService = tasks.register("generateAppsService", JavaExec) {
     classpath = configurations.libraryTypeGenerator
     mainClass = "io.github.intisy.ai.seam.jvm.library.LibraryTypeGenerator"
     def output = generatedTypes.get().asFile
     args declaration.absolutePath, output.absolutePath, "io.github.forebay.library.parity"
     inputs.file declaration
+    inputs.file pinFile
     outputs.dir output
     doFirst {
+        def pinned = new groovy.json.JsonSlurper().parse(pinFile, "UTF-8").sha256["library.json"]
+        def actual = sha256Of(declaration)
+        if (actual != pinned) {
+            throw new GradleException("library.json has SHA-256 " + actual + " but parity/pin.json pins " + pinned
+                + ": generate AppsService from the pinned release's declaration, or move the pin to the release this library.json shipped in")
+        }
         project.delete(output)
     }
 }
@@ -58,6 +72,8 @@ tasks.named("test") {
     systemProperty "parity.directory", parityDirectory.absolutePath
     inputs.dir new File(parityDirectory, "cases")
     inputs.file new File(parityDirectory, "divergences.json")
+    inputs.file pinFile
+    inputs.property "parityCases", System.getenv("PARITY_CASES") ?: ""
     inputs.dir(new File(parityDirectory, "expected")).optional()
     testLogging {
         events "passed", "failed"

@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class AppsParityTest {
 
@@ -31,6 +32,8 @@ class AppsParityTest {
         Path work = cases.workDirectory(IMPLEMENTATION);
         Path libraryCache = work.resolve(".library-cache");
         List<String> names = cases.names();
+        assertFalse(names.isEmpty(), "no cases were found, so the run would hold the library to nothing");
+        assertEquals(new ArrayList<String>(), casesMissingFrom(names), "a divergence names a case the run does not have");
         List<String> mismatches = new ArrayList<String>();
         Set<JsonObject> held = new HashSet<JsonObject>();
         int calls = 0;
@@ -41,7 +44,7 @@ class AppsParityTest {
             StagedCase staged = cases.stage(name, work);
             JsonArray answers = expected.getAsJsonArray("answers");
             assertEquals(staged.calls().size(), answers.size(), name + " has a stale expected file");
-            try (ParityHost host = ParityHost.start(staged, ParityPins.pins(), libraryCache)) {
+            try (ParityHost host = ParityHost.start(staged, ParityPins.pins(cases), libraryCache)) {
                 for (int index = 0; index < staged.calls().size(); index++) {
                     calls += 1;
                     JsonObject divergence = divergenceFor(divergences, name, index);
@@ -57,12 +60,24 @@ class AppsParityTest {
             }
         }
 
+        assertEquals(cases.declaredCallCount(names), calls, "the run made fewer or more calls than the case files declare");
         List<JsonObject> unheld = new ArrayList<JsonObject>(divergences);
         unheld.removeAll(held);
         System.out.println("java: " + names.size() + " cases, " + calls + " calls, " + held.size()
                 + " recorded divergences held, " + mismatches.size() + " mismatches");
         assertEquals(new ArrayList<JsonObject>(), unheld, "a divergence names no case and call");
         assertEquals(new ArrayList<String>(), mismatches);
+    }
+
+    private List<String> casesMissingFrom(List<String> names) throws Exception {
+        List<String> missing = new ArrayList<String>();
+        for (JsonElement entry : cases.divergences()) {
+            String name = entry.getAsJsonObject().get("case").getAsString();
+            if (!names.contains(name)) {
+                missing.add(name);
+            }
+        }
+        return missing;
     }
 
     private List<JsonObject> divergencesOfThisImplementation() throws Exception {

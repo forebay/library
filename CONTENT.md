@@ -113,7 +113,8 @@ its `case.json` places), an environment, a home layout, an argument vector and a
 
 - `parity/oracle.mjs` runs every case through basekit's `getApps`, `getApp`, `resolveHome` and
   `currentAppId` at the pinned commit and writes `parity/expected/`, never committed, since paths
-  differ per platform. basekit throwing is recorded as `{"fails": true}`.
+  differ per platform. basekit throwing from its own code is recorded as `{"fails": true}`; any
+  other error stops the oracle.
 - `parity/typescript` starts `weivel/typescript`'s host with the pinned release and a plugin requiring
   `apps`, and compares what the plugin observes with the expected answers.
 - `parity/java` does the same through `weivel/java`'s `LibraryServices` and the `AppsService`
@@ -146,4 +147,13 @@ A `v*` tag runs `intisy/workflows`' `library.yml`, which builds `apps-linux-x64.
 | | | `apps-win32-x64.dll` | `ab82e9fcce22f5c1e032c924f5deafdbd14421ab2c60026fc7f20165f8f7c59a` |
 | | | `library.json` | `8bc33a51b755b8cb1dd167279fd2a53605c5de909d0150af1982f90177dd8b86` |
 
-A consumer pins these digests: <https://github.com/forebay/library/releases/tag/v0.1.0>.
+| `v0.1.1` | `3174ba4d874e01e008597bbd76f0b3a6bba478b1` | `apps-linux-x64.so` | `511a24739c7f05ff3c58d32171c42b3ee3c5bf840afad074aeaeba7d4d77f2cd` |
+| | | `apps-win32-x64.dll` | `ecc2616750b6f1168c127ddf3619b9d46e06c4e47078155681558e565e5c5f0d` |
+| | | `library.json` | `420e0f66f8b82b5ec4704c87089ec79caf9475e68262bd1b5878e079faefa2f6` |
+
+`v0.1.1` takes the JSON grammar, the UTF-8 decoding and JavaScript's string rules from `spisor/library`
+(`e048e09`) instead of carrying its own copies, raises out of memory where `v0.1.0` answered an empty
+registry, and declares version `0.1.1`. The answers are otherwise those of `v0.1.0`.
+
+A consumer pins the latest digests: <https://github.com/forebay/library/releases/tag/v0.1.1>. The
+parity suite pins the same release, in `parity/pin.json`.

@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { registerHooks } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -58,20 +58,38 @@ function basekitAnswer(basekit, call, staged) {
   }
 }
 
+/** The basekit source as the loader names it in a stack, through the link and as it resolves. */
+function basekitSourceUrls() {
+  const source = join(siblingPath("basekit"), "src");
+  return [pathToFileURL(source).href, pathToFileURL(realpathSync(source)).href];
+}
+
+/**
+ * @implNote Only an error whose stack runs through basekit's own source is basekit's answer: the
+ * oracle's own mistakes are thrown outside it and stop the run, rather than becoming an expected
+ * failure that both drivers would then be held to.
+ */
+function isThrownByBasekit(error) {
+  const stack = error instanceof Error && typeof error.stack === "string" ? error.stack : "";
+  return BASEKIT_SOURCE_URLS.some((url) => stack.includes(url));
+}
+
 function answerOf(basekit, call, staged) {
   let answer;
   try {
     answer = basekitAnswer(basekit, call, staged);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("which the apps service does not declare")) throw error;
-    return failure();
+    if (isThrownByBasekit(error)) return failure();
+    throw error;
   }
   return normalised(JSON.parse(JSON.stringify(answer)), staged);
 }
 
+const BASEKIT_SOURCE_URLS = basekitSourceUrls();
 resolveEmittedNamesToSource();
 const basekit = await import(pathToFileURL(join(siblingPath("basekit"), "src", "apps.ts")).href);
 const names = caseNames();
+if (names.length === 0) throw new Error("the oracle found no cases, so it would hold the library to nothing");
 for (const name of names) {
   const staged = stageCase(name, workDirectory("oracle"));
   writeExpected(name, staged.calls.map((call) => answerOf(basekit, call, staged)));

@@ -3,7 +3,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const PARITY_DIRECTORY = dirname(fileURLToPath(import.meta.url));
-export const CASES_DIRECTORY = join(PARITY_DIRECTORY, "cases");
+/** `PARITY_CASES` points a driver at another case set, which is how the suite is shown to refuse an empty one. */
+export const CASES_DIRECTORY = process.env.PARITY_CASES ? resolve(process.env.PARITY_CASES) : join(PARITY_DIRECTORY, "cases");
+export const PIN_FILE = join(PARITY_DIRECTORY, "pin.json");
 export const EXPECTED_DIRECTORY = join(PARITY_DIRECTORY, "expected");
 export const DIVERGENCES_FILE = join(PARITY_DIRECTORY, "divergences.json");
 const DEFAULT_REGISTRY = "{home}/.config/forebay/apps.json";
@@ -30,6 +32,19 @@ export function caseNames() {
 
 export function failure() {
   return FAILURE;
+}
+
+function definitionOf(name) {
+  return JSON.parse(readFileSync(join(CASES_DIRECTORY, name, "case.json"), "utf8"));
+}
+
+/** How many calls the case files declare, counted apart from any run so a run that skips one is caught. */
+export function declaredCallCount(names) {
+  return names.reduce((total, name) => total + definitionOf(name).calls.length, 0);
+}
+
+export function readPin() {
+  return JSON.parse(readFileSync(PIN_FILE, "utf8"));
 }
 
 function substitute(text, staged) {
@@ -73,7 +88,7 @@ function substitutedValues(record, staged) {
  */
 export function stageCase(name, workRoot) {
   const caseDirectory = join(CASES_DIRECTORY, name);
-  const definition = JSON.parse(readFileSync(join(caseDirectory, "case.json"), "utf8"));
+  const definition = definitionOf(name);
   const root = resolve(workRoot, name);
   const staged = { name, root, home: join(root, "home") };
   rmSync(root, { recursive: true, force: true });

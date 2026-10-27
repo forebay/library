@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { caseNames, currentPlatform, readDivergences, readExpected, stageCase, workDirectory } from "../../stage.mjs";
+import { caseNames, currentPlatform, declaredCallCount, readDivergences, readExpected, stageCase, workDirectory } from "../../stage.mjs";
 import type { Divergence } from "../../stage.mjs";
 import { observedAnswer } from "./observe.js";
 import { startParityHost } from "./parity-host.js";
@@ -45,6 +45,8 @@ describe("the apps library through the TypeScript host", () => {
   it("answers every case as basekit does", async () => {
     const divergences = readDivergences().filter((entry) => entry.implementations.includes(IMPLEMENTATION));
     const names = caseNames();
+    expect(names.length, "no cases were found, so the run would hold the library to nothing").toBeGreaterThan(0);
+    expect(readDivergences().map((entry) => entry.case).filter((name) => !names.includes(name)), "a divergence names a case the run does not have").toEqual([]);
     const mismatches: Mismatch[] = [];
     const held = new Set<Divergence>();
     let calls = 0;
@@ -69,6 +71,7 @@ describe("the apps library through the TypeScript host", () => {
     }
 
     console.log(`typescript: ${names.length} cases, ${calls} calls, ${held.size} recorded divergences held, ${mismatches.length} mismatches`);
+    expect(calls, "the run made fewer or more calls than the case files declare").toBe(declaredCallCount(names));
     expect(divergences.filter((entry) => !held.has(entry)), "a divergence names no case and call").toEqual([]);
     expect(mismatches).toEqual([]);
   });
