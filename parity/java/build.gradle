@@ -1,0 +1,67 @@
+plugins {
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
+def weivel = "0.0.0-dev"
+
+configurations {
+    libraryTypeGenerator
+}
+
+dependencies {
+    libraryTypeGenerator "io.github.intisy:jvm-seam:${weivel}"
+
+    testImplementation "io.github.intisy:jvm-seam:${weivel}"
+    testImplementation "io.github.intisy:annotations:${weivel}"
+    testImplementation "com.google.code.gson:gson:2.10.1"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.1"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+def parityDirectory = file("..")
+def declaration = new File(parityDirectory, "../library.json")
+def generatedTypes = layout.buildDirectory.dir("generated/library-types")
+
+// The service interface is generated from this repository's library.json on every build, the one the
+// pinned release carries, so the test exercises the generator a Java embedder uses.
+def generateAppsService = tasks.register("generateAppsService", JavaExec) {
+    classpath = configurations.libraryTypeGenerator
+    mainClass = "io.github.intisy.ai.seam.jvm.library.LibraryTypeGenerator"
+    def output = generatedTypes.get().asFile
+    args declaration.absolutePath, output.absolutePath, "io.github.forebay.library.parity"
+    inputs.file declaration
+    outputs.dir output
+    doFirst {
+        project.delete(output)
+    }
+}
+sourceSets.test.java.srcDir(generateAppsService)
+
+// The cases, divergences and expected answers are read off disk at run time, so Gradle is told
+// about them, or a changed expectation would answer UP-TO-DATE.
+tasks.named("test") {
+    useJUnitPlatform()
+    systemProperty "parity.directory", parityDirectory.absolutePath
+    inputs.dir new File(parityDirectory, "cases")
+    inputs.file new File(parityDirectory, "divergences.json")
+    inputs.dir(new File(parityDirectory, "expected")).optional()
+    testLogging {
+        events "passed", "failed"
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}

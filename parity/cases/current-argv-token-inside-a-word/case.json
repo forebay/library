@@ -1,0 +1,14 @@
+{
+  "environment": {},
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/opt/alphabet/betamax.js"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

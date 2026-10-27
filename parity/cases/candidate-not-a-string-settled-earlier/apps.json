@@ -1,0 +1,11 @@
+{
+  "zeta": {
+    "label": "Zeta",
+    "home": {
+      "envOverride": "ZETA_HOME",
+      "candidates": [
+        5
+      ]
+    }
+  }
+}

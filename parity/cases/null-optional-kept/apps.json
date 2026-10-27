@@ -1,0 +1,13 @@
+{
+  "kept": {
+    "label": "Kept",
+    "home": {
+      "candidates": [
+        "~/.k"
+      ]
+    },
+    "icon": null,
+    "loader": null,
+    "accent": "#123456"
+  }
+}

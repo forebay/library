@@ -1,0 +1,11 @@
+{
+  "odd": {
+    "label": "Odd",
+    "home": {
+      "xdgSubdir": 7,
+      "candidates": [
+        "~/.odd"
+      ]
+    }
+  }
+}

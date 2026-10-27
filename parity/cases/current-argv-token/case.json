@@ -1,0 +1,14 @@
+{
+  "environment": {},
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/usr/lib/node_modules/alpha-cli/bin/alpha.js"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

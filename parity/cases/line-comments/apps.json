@@ -1,0 +1,9 @@
+// the registry
+{
+  // the first app
+    // indented
+  "alpha": { "label": "Alpha", "home": { "candidates": ["~/.a"] } },
+	// tabbed
+  "beta": { "label": "// not a comment", "home": { "candidates": ["~/.b"] } }
+}
+// trailing

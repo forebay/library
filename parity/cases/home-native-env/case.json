@@ -1,0 +1,19 @@
+{
+  "environment": {
+    "BETA_CONFIG_DIR": "/bc",
+    "XDG_CONFIG_HOME": "/xdg"
+  },
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/usr/lib/node_modules/unrelated/cli.js"
+  ],
+  "calls": [
+    {
+      "function": "home",
+      "argument": {
+        "id": "beta"
+      }
+    }
+  ]
+}

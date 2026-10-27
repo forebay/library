@@ -1,0 +1,16 @@
+{
+  "environment": {
+    "BETA_CONFIG_DIR": "/somewhere/beta"
+  },
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/test-runner/entry.js"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

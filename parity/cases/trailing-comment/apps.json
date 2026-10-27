@@ -1,0 +1,3 @@
+{
+  "alpha": { "label": "Alpha", "home": { "candidates": ["~/.a"] } } // after the value
+}

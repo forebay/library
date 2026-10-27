@@ -1,0 +1,11 @@
+{
+  "zeta": {
+    "label": "Zeta",
+    "home": {
+      "candidates": [
+        5,
+        "~/.zeta"
+      ]
+    }
+  }
+}

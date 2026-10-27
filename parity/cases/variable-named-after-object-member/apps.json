@@ -1,0 +1,11 @@
+{
+  "proto": {
+    "label": "Proto",
+    "home": {
+      "envOverride": "toString",
+      "candidates": [
+        "~/.p"
+      ]
+    }
+  }
+}

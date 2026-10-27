@@ -1,0 +1,14 @@
+{
+  "environment": {},
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/usr/bin/İdea"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

@@ -104,6 +104,35 @@ The shared C conventions come from `spisor/library` through `FetchContent`, pinn
 `e048e09e743ae7d924ad5b33af48c4d3bc436644`. The tests call the exported functions through the built
 shared library, one CTest executable per concern, on Windows and Linux in CI.
 
+## Parity with basekit
+
+`parity/` holds the released library to basekit's answers through both weivel hosts, on Windows and
+Linux in CI (`parity.yml`). Each case in `parity/cases/` is a registry (`apps.json`, or the `files`
+its `case.json` places), an environment, a home layout, an argument vector and a list of calls;
+`{home}` and `{root}` stand for the directories the case is laid out in.
+
+- `parity/oracle.mjs` runs every case through basekit's `getApps`, `getApp`, `resolveHome` and
+  `currentAppId` at the pinned commit and writes `parity/expected/`, never committed, since paths
+  differ per platform. basekit throwing is recorded as `{"fails": true}`.
+- `parity/typescript` starts `weivel/typescript`'s host with the pinned release and a plugin requiring
+  `apps`, and compares what the plugin observes with the expected answers.
+- `parity/java` does the same through `weivel/java`'s `LibraryServices` and the `AppsService`
+  generated from `library.json`, reading each answer through the getters a Java plugin calls.
+- `parity/divergences.json` lists every answer that is not basekit's, with its reason. Each is held
+  both ways: the implementation must answer what the table records and basekit must answer something
+  else. Beside the library's own divergences above, two are the Java host's: a Java data interface
+  cannot tell a `null` optional field from an absent one, and Gson reads a number into a `String`
+  property as a string.
+
+The siblings are checked out under `siblings/` (CI pins each to a commit; locally a link to each
+checkout does):
+
+```
+node parity/oracle.mjs
+npm test --prefix parity/typescript
+cd parity/java && ./gradlew test
+```
+
 ## Releasing
 
 A `v*` tag runs `intisy/workflows`' `library.yml`, which builds `apps-linux-x64.so` and
