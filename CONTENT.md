@@ -101,7 +101,7 @@ ctest --test-dir build --output-on-failure -C Debug
 ```
 
 The shared C conventions come from `spisor/library` through `FetchContent`, pinned to commit
-`e048e09e743ae7d924ad5b33af48c4d3bc436644`. The tests call the exported functions through the built
+`21ce6f12ced44d3bb3f92aae72a2d0fa6e7bb6cd`. The tests call the exported functions through the built
 shared library, one CTest executable per concern, on Windows and Linux in CI.
 
 ## Parity with basekit

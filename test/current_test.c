@@ -89,6 +89,19 @@ static void matches_an_app_whose_native_variable_is_set(void) {
     registry_case_close(&open);
 }
 
+static void matches_a_native_variable_named_in_another_case_as_the_platform_does(void) {
+    registry_case open = registry_case_open();
+    support_write(open.file, "{\"alpha\":" ALPHA ",\"beta\":" BETA "}");
+#ifdef _WIN32
+    const char *expected = "beta";
+#else
+    const char *expected = "";
+#endif
+    expect_current(support_call(apps_current, "{}", quiet_context(&open, "Beta_Config_Dir", "/somewhere/beta")), expected,
+                   "a nativeEnv spelled in another case");
+    registry_case_close(&open);
+}
+
 static void matches_a_forced_directory_inside_a_candidate(void) {
     registry_case open = registry_case_open();
     char *candidate = support_join(open.home, "gamma-dir");
@@ -174,6 +187,7 @@ int main(void) {
     lowercases_a_declared_binary();
     fails_for_a_binary_that_is_not_a_string();
     matches_an_app_whose_native_variable_is_set();
+    matches_a_native_variable_named_in_another_case_as_the_platform_does();
     matches_a_forced_directory_inside_a_candidate();
     matches_a_candidate_inside_a_forced_directory();
     matches_a_forced_directory_by_its_xdg_subdirectory();
