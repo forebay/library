@@ -12,9 +12,9 @@ jobs:
       toolchains: node gradle
       runners: '["ubuntu-latest","windows-latest"]'
       extra_repositories: |
-        weivel/model siblings/model 6232ad6f2c973f111f2451ca934c525d82c84a27
-        weivel/typescript siblings/typescript 7e10a5a9f21d01e0785234aac2d7ddbeebd26dcd
-        weivel/java siblings/java 9fb2029950b5e28697496e602c999e9baa488d18
+        weivel/model siblings/model 0a2e3321c08afc04848c92ee4fc42dc8d9047a87
+        weivel/typescript siblings/typescript d6ee45223a49e1af6bb6322eb2b1d33196a40076
+        weivel/java siblings/java 5fe864634274afe5acc76706d570df3010d62432
         forebay/basekit siblings/basekit aa782b7b9e7c8ad7eadc0b79018b7d966af640cf
       node_install: npm ci --prefix siblings/typescript && npm ci --prefix parity/typescript
       node_build: npm run build --prefix siblings/typescript && node parity/oracle.mjs
