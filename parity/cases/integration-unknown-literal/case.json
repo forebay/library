@@ -1,0 +1,20 @@
+{
+  "environment": {},
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/usr/lib/node_modules/unrelated/cli.js"
+  ],
+  "calls": [
+    {
+      "function": "list",
+      "argument": {}
+    },
+    {
+      "function": "get",
+      "argument": {
+        "id": "beta"
+      }
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import io.github.intisy.ai.engine.PluginException;
 import io.github.intisy.ai.tsemit.TsLiteral;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +25,15 @@ import java.util.Map;
  */
 final class Observed {
 
+    private static final JsonObject REFUSED = refused();
+
     private Observed() {
+    }
+
+    private static JsonObject refused() {
+        JsonObject refused = new JsonObject();
+        refused.addProperty("refused", true);
+        return refused;
     }
 
     static JsonElement of(Object value) {
@@ -63,11 +72,19 @@ final class Observed {
         return Proxy.isProxyClass(value.getClass()) ? dataInterface(value) : generatedClass(value);
     }
 
+    /**
+     * @implNote A getter the seam refuses, which it does for a value its declared type cannot hold,
+     * is written as {@code {"refused": true}} so the other properties are still observed.
+     */
     private static JsonObject dataInterface(Object proxy) {
         JsonObject object = new JsonObject();
         for (Method property : proxy.getClass().getInterfaces()[0].getMethods()) {
             if (!Modifier.isStatic(property.getModifiers()) && property.getParameterTypes().length == 0) {
-                addProperty(object, property.getName(), invoke(property, proxy));
+                try {
+                    addProperty(object, property.getName(), invoke(property, proxy));
+                } catch (GetterRefusal refused) {
+                    object.add(property.getName(), REFUSED.deepCopy());
+                }
             }
         }
         return object;
@@ -93,8 +110,19 @@ final class Observed {
     private static Object invoke(Method getter, Object target) {
         try {
             return getter.invoke(target);
-        } catch (IllegalAccessException | InvocationTargetException unreadable) {
+        } catch (InvocationTargetException thrown) {
+            if (thrown.getCause() instanceof PluginException) {
+                throw new GetterRefusal();
+            }
+            throw new IllegalStateException("cannot read " + getter, thrown);
+        } catch (IllegalAccessException unreadable) {
             throw new IllegalStateException("cannot read " + getter, unreadable);
+        }
+    }
+
+    private static final class GetterRefusal extends RuntimeException {
+        GetterRefusal() {
+            super(null, null, false, false);
         }
     }
 

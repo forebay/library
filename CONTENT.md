@@ -121,9 +121,14 @@ its `case.json` places), an environment, a home layout, an argument vector and a
   generated from `library.json`, reading each answer through the getters a Java plugin calls.
 - `parity/divergences.json` lists every answer that is not basekit's, with its reason. Each is held
   both ways: the implementation must answer what the table records and basekit must answer something
-  else. Beside the library's own divergences above, two are the Java host's: a Java data interface
-  cannot tell a `null` optional field from an absent one, and Gson reads a number into a `String`
-  property as a string.
+  else. Beside the library's own divergences above, which include an unpaired surrogate escape
+  read as U+FFFD, the rest are the Java host's: a Java data interface cannot tell a `null` optional
+  field from an absent one, Gson reads a number into a `String` property as a string, and a getter
+  whose value its type cannot hold (an unknown enum literal, a string `proxyPort`) refuses while
+  the descriptor's other getters answer. The Java driver observes such a getter as
+  `{"refused": true}`.
+- `parity/oracle.mjs` hands basekit the case's environment with `process.env`'s matching on the
+  platform it runs on, which on Windows ignores case.
 
 The siblings are checked out under `siblings/` (CI pins each to a commit; locally a link to each
 checkout does):
@@ -149,10 +154,17 @@ A `v*` tag runs `intisy/workflows`' `library.yml`, which builds `apps-linux-x64.
 | `v0.1.1` | `3174ba4d874e01e008597bbd76f0b3a6bba478b1` | `apps-linux-x64.so` | `511a24739c7f05ff3c58d32171c42b3ee3c5bf840afad074aeaeba7d4d77f2cd` |
 | | | `apps-win32-x64.dll` | `ecc2616750b6f1168c127ddf3619b9d46e06c4e47078155681558e565e5c5f0d` |
 | | | `library.json` | `420e0f66f8b82b5ec4704c87089ec79caf9475e68262bd1b5878e079faefa2f6` |
+| `v0.1.2` | `3f5c10b5b3cf932237e9612ace76440b7e894a1d` | `apps-linux-x64.so` | `ca9b8138b25db256f28324549b677fa920e700b09d948728a8ed94bb1bc868d5` |
+| | | `apps-win32-x64.dll` | `f2d5554b3f232271bbb5ade94d4af5bd4f320748484a3cf9915b3c4975d974c9` |
+| | | `library.json` | `7f08130d8b600a6e77260e5817c1338dc8707bcbec9003753b790806b7430264` |
 
 `v0.1.1` takes the JSON grammar, the UTF-8 decoding and JavaScript's string rules from `spisor/library`
 (`e048e09`) instead of carrying its own copies, raises out of memory where `v0.1.0` answered an empty
 registry, and declares version `0.1.1`. The answers are otherwise those of `v0.1.0`.
 
-A consumer pins the latest digests: <https://github.com/forebay/library/releases/tag/v0.1.1>. The
+`v0.1.2` matches environment names ignoring ASCII case on Windows, as `process.env` does there, so
+a native variable spelled in another case is found, taking that from `spisor/library` (`21ce6f1`),
+and declares version `0.1.2`.
+
+A consumer pins the latest digests: <https://github.com/forebay/library/releases/tag/v0.1.2>. The
 parity suite pins the same release, in `parity/pin.json`.

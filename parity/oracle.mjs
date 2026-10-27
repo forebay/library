@@ -40,8 +40,27 @@ function withProcessFacts(staged, work) {
   }
 }
 
+/**
+ * The case's environment as basekit reads `process.env` on this platform.
+ *
+ * @implNote On Windows `process.env` matches a name ignoring case, so a plain object would hide a
+ * native variable spelled in another case that every real basekit finds. Of two names differing
+ * only in case, which Windows cannot hold, the later answers, as JSON.parse keeps the later key.
+ */
+function platformEnvironment(environment) {
+  if (process.platform !== "win32") return environment;
+  const matching = (name) =>
+    typeof name === "string" ? Object.keys(environment).findLast((key) => key.toUpperCase() === name.toUpperCase()) : undefined;
+  return new Proxy(environment, {
+    get: (target, name) => Reflect.get(target, matching(name) ?? name),
+    has: (target, name) => Reflect.has(target, matching(name) ?? name),
+    getOwnPropertyDescriptor: (target, name) => Reflect.getOwnPropertyDescriptor(target, matching(name) ?? name),
+  });
+}
+
 function basekitAnswer(basekit, call, staged) {
-  const { environment, home } = staged;
+  const home = staged.home;
+  const environment = platformEnvironment(staged.environment);
   switch (call.function) {
     case "list":
       return { apps: basekit.getApps(environment, home) };

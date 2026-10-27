@@ -14,7 +14,7 @@ jobs:
       extra_repositories: |
         weivel/model siblings/model 6232ad6f2c973f111f2451ca934c525d82c84a27
         weivel/typescript siblings/typescript 7e10a5a9f21d01e0785234aac2d7ddbeebd26dcd
-        weivel/java siblings/java 6e02d6828156e2b7d06ffdfe67c9697cafcd5938
+        weivel/java siblings/java 9fb2029950b5e28697496e602c999e9baa488d18
         forebay/basekit siblings/basekit aa782b7b9e7c8ad7eadc0b79018b7d966af640cf
       node_install: npm ci --prefix siblings/typescript && npm ci --prefix parity/typescript
       node_build: npm run build --prefix siblings/typescript && node parity/oracle.mjs
