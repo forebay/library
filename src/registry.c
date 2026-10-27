@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "spisor/file.h"
+#include "spisor/json_file.h"
 #include "spisor/path.h"
 
 #define ECOSYSTEM_DIRECTORY "forebay"
@@ -54,7 +55,7 @@ static cJSON *parse_registry(const uint8_t *bytes, size_t length) {
     size_t decoded_length = 0;
     size_t text_length = 0;
     uint8_t *decoded = spisor_decode_utf8_lossy(bytes, length, &decoded_length);
-    char *text = decoded == NULL ? NULL : apps_strip_comment_lines((const char *)decoded, decoded_length, &text_length);
+    char *text = decoded == NULL ? NULL : spisor_strip_comment_lines((const char *)decoded, decoded_length, &text_length);
     free(decoded);
     if (text == NULL) {
         return NULL;
