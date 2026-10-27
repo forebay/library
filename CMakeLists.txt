@@ -8,7 +8,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 include(FetchContent)
 FetchContent_Declare(spisor_library
     GIT_REPOSITORY https://github.com/spisor/library.git
-    GIT_TAG e048e09e743ae7d924ad5b33af48c4d3bc436644)
+    GIT_TAG 21ce6f12ced44d3bb3f92aae72a2d0fa6e7bb6cd)
 FetchContent_MakeAvailable(spisor_library)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

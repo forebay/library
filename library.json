@@ -1,7 +1,7 @@
 {
   "$schema": "https://weivel.github.io/model/library.schema.json",
   "id": "apps",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "binary": "apps",
   "release": "apps_release",
   "services": [
