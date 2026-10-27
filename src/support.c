@@ -12,6 +12,14 @@ char *apps_copy(const char *text) {
     return copy;
 }
 
+char *apps_copy_or_raise(const char *text, apps_error *error) {
+    char *copy = apps_copy(text);
+    if (copy == NULL) {
+        apps_raise_out_of_memory(error);
+    }
+    return copy;
+}
+
 char *apps_join(const char *first, const char *second) {
     size_t first_length = strlen(first);
     size_t second_length = strlen(second);

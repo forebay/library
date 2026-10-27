@@ -9,9 +9,9 @@
 static char *variable_named_by(const cJSON *descriptor, const char *name, const apps_facts *facts, apps_error *error) {
     const cJSON *declared = apps_home_member(descriptor, name);
     if (!apps_is_truthy(declared)) {
-        return apps_copy("");
+        return apps_copy_or_raise("", error);
     }
-    char *key = apps_to_property_key(declared);
+    char *key = spisor_javascript_string(declared);
     if (key == NULL) {
         apps_raise_out_of_memory(error);
         return NULL;
@@ -54,7 +54,7 @@ char **apps_expand_candidates(const cJSON *descriptor, const apps_facts *facts, 
 static char *xdg_home(const cJSON *descriptor, const apps_facts *facts, apps_error *error) {
     const cJSON *subdirectory = apps_home_member(descriptor, "xdgSubdir");
     if (!apps_is_truthy(subdirectory)) {
-        return apps_copy("");
+        return apps_copy_or_raise("", error);
     }
     char *xdg = apps_trimmed_environment(facts, "XDG_CONFIG_HOME", error);
     if (xdg == NULL || xdg[0] == '\0') {

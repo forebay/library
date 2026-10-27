@@ -20,7 +20,7 @@ static int names_an_object_prototype_member(const char *name) {
 char *apps_trimmed_environment(const apps_facts *facts, const char *name, apps_error *error) {
     const char *value = spisor_environment(facts->call, name);
     if (value != NULL) {
-        char *trimmed = apps_trim(value);
+        char *trimmed = spisor_javascript_trim(value);
         if (trimmed == NULL) {
             apps_raise_out_of_memory(error);
         }

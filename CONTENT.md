@@ -42,17 +42,21 @@ answered only for a malformed call or where basekit **throws**:
 ## How the registry text is read
 
 basekit reads the file as UTF-8, strips whole-line comments with `/^\s*\/\/[^\n]*/gm`, and hands the
-rest to `JSON.parse`. Each step is mirrored, in that order:
+rest to `JSON.parse`. Each step is mirrored, in that order. The Node and JavaScript semantics come from
+`spisor/library` (`spisor/javascript.h` and `spisor_parse_json`); only the comment regex, which is
+basekit's own, lives here.
 
-- **Invalid UTF-8 becomes U+FFFD** per maximal invalid subpart, as Node decodes it, rather than
-  failing; so does an unpaired surrogate escape, through `spisor_parse_json`.
-- **The comment regex is JavaScript's**: its `\s` also eats a BOM, a no-break space and every other
-  Unicode space before the `//`, and its `^` also holds after a CR, U+2028 or U+2029, while the comment
-  runs to the next LF. Anything inside a stripped comment, a NUL or invalid bytes included, is gone
-  before parsing.
-- **The grammar is `JSON.parse`'s, checked before cJSON reads it**, because cJSON is laxer: it skips a
-  BOM, takes any byte up to 0x20 as whitespace, accepts raw control characters in a string, and reads
-  `01` and `1.`. So a registry starting with a BOM answers `[]`, exactly as basekit's does.
+- **Invalid UTF-8 becomes U+FFFD** per maximal invalid subpart, as Node decodes it
+  (`spisor_decode_utf8_lossy`), rather than failing; so does an unpaired surrogate escape, through
+  `spisor_parse_json`.
+- **The comment regex is JavaScript's**: its `\s` also eats a BOM, a no-break space, every other
+  Unicode space, and whole earlier lines of nothing but whitespace (a vertical tab or form feed
+  included) before the `//`; its `^` also holds after a CR, U+2028 or U+2029, while the comment runs
+  to the next LF. Anything inside a stripped comment, a NUL or invalid bytes included, is gone before
+  parsing.
+- **The grammar is `JSON.parse`'s**: `spisor_parse_json` checks it before cJSON reads anything,
+  because cJSON is laxer (a BOM, any byte up to 0x20 as whitespace, raw control characters in a
+  string, `01` and `1.`). So a registry starting with a BOM answers `[]`, exactly as basekit's does.
 - **Entries come out in `Object.entries` order**: array-index keys (`0` to `4294967294`, no leading
   zero, no sign) ascending, then every other key as written. A duplicated key keeps its first
   position and its last value.
@@ -70,9 +74,9 @@ declared one, then the `HUB_<KIND>_SUBDIR` variable, then the default, taking th
 string and, trimmed, one path segment (not empty, `.` or `..`, and holding no `/` or `\`).
 
 A home field that names a variable (`envOverride`, `nativeEnv`) is keyed as JavaScript keys any
-value: a number by its shortest decimal form, `true` as `true`, an array by its join, an object as
-`[object Object]`. Paths are joined with the rules of the OS the binary runs on, as Node's
-`path.join` there does; trimming is `String.prototype.trim`.
+value (`spisor_javascript_string`): a number by its shortest decimal form, `true` as `true`, an
+array by its join, an object as `[object Object]`. Paths are joined with the rules of the OS the binary runs on, as Node's
+`path.join` there does; trimming is `String.prototype.trim` (`spisor_javascript_trim`).
 
 ## Recorded divergences
 
@@ -83,6 +87,8 @@ value: a number by its shortest decimal form, `true` as `true`, an array by its 
 - **An escaped NUL (`\u0000`) anywhere in the registry answers `[]`**, where `JSON.parse` reads it: no
   C string can carry one.
 - **Nesting deeper than cJSON's limit of 1000 answers `[]`**, where `JSON.parse` has no limit.
+- **Out of memory is status 2**, never an answer, except for an allocation failing inside cJSON while
+  it parses the registry, which `spisor_parse_json` cannot tell from a refusal and so reads as `[]`.
 - **A relative candidate or override is checked against the working directory** of the process, as
   `existsSync` does; that is the one ambient fact a call depends on.
 
@@ -95,7 +101,7 @@ ctest --test-dir build --output-on-failure -C Debug
 ```
 
 The shared C conventions come from `spisor/library` through `FetchContent`, pinned to commit
-`04ea2c83cc0efc27669ee4303e0bbbcf4dfcfc17`. The tests call the exported functions through the built
+`e048e09e743ae7d924ad5b33af48c4d3bc436644`. The tests call the exported functions through the built
 shared library, one CTest executable per concern, on Windows and Linux in CI.
 
 ## Releasing

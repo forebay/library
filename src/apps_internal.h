@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "cJSON.h"
+#include "spisor/javascript.h"
 #include "spisor/json_kind.h"
 
 #if defined(_WIN32)
@@ -39,41 +40,25 @@ void apps_clear_error(apps_error *error);
 char *apps_copy(const char *text);
 char *apps_join(const char *first, const char *second);
 
-/**
- * The registry text as basekit's readJson hands it to JSON.parse: decoded the way Node decodes
- * UTF-8 (each maximal invalid subpart becomes U+FFFD), then stripped of every whole-line comment
- * as basekit's multiline regex strips it, and re-encoded as UTF-8.
- *
- * @implNote The regex's \s is JavaScript's, so it also eats a BOM or a no-break space in front of
- * the comment, and its ^ also holds after a CR, U+2028 or U+2029, while the comment itself runs to
- * the next LF only.
- */
-char *apps_registry_text(const uint8_t *bytes, size_t length, size_t *text_length);
+/** apps_copy that raises out of memory, so a failed copy can never be read as an answer. */
+char *apps_copy_or_raise(const char *text, apps_error *error);
 
 /**
- * True when JSON.parse accepts the text's grammar.
+ * basekit's whole-line comment strip, the multiline regex readJson applies before JSON.parse, on
+ * well-formed UTF-8. Freed with free, NULL only when memory runs out.
  *
- * @implNote cJSON is laxer than JSON.parse: it skips a BOM and every byte up to 0x20 as
- * whitespace, takes raw control characters inside a string, and reads numbers such as 01 and 1.
- * through strtod. Each of those makes JSON.parse throw, so basekit reads such a registry as empty,
- * and this check is what keeps cJSON from reading it at all.
+ * @implNote The regex's whitespace class is JavaScript's, so it also eats a BOM, a no-break space,
+ * or earlier lines of nothing but whitespace (a vertical tab included) in front of the comment,
+ * and its line start also holds after a CR, U+2028 or U+2029, while the comment itself runs to the
+ * next LF only.
  */
-int apps_is_json_parse_text(const char *text, size_t length);
+char *apps_strip_comment_lines(const char *text, size_t length, size_t *stripped_length);
 
-/** JavaScript's WhiteSpace and LineTerminator, which both \s and String.prototype.trim match. */
-int apps_is_javascript_space(uint32_t code_point);
-
-/** JavaScript's String.prototype.trim, on UTF-8. */
-char *apps_trim(const char *text);
-
-/** The registry as basekit's readRaw answers it: always an object, empty when absent or malformed. */
-cJSON *apps_read_registry(const apps_facts *facts);
+/** The registry as basekit's readRaw answers it: an object, empty when absent or malformed; NULL only when memory runs out. */
+cJSON *apps_read_registry(const apps_facts *facts, apps_error *error);
 
 int apps_is_nullish(const cJSON *value);
 int apps_is_truthy(const cJSON *value);
-
-/** JavaScript's String(value), which is what a value used as a property key becomes. */
-char *apps_to_property_key(const cJSON *value);
 
 /**
  * basekit's trimmed(env[name]), answering a copy, or an empty copy when the variable is absent.
