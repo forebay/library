@@ -131,6 +131,314 @@
         ]
       },
       "because": "AppHome.candidates is a List<String> and Gson reads the number 5 into it as the string \"5\", so a Java plugin observes a string where basekit answers the registry's number"
+    },
+    {
+      "case": "unpaired-surrogate-escape",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "apps": [
+          {
+            "id": "lone",
+            "label": "Lone \ufffd label",
+            "home": {
+              "candidates": [
+                "~/.lone"
+              ]
+            },
+            "detect": {
+              "binary": "lone",
+              "pkg": ""
+            },
+            "commandsSubdir": "commands",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 0,
+            "integration": "env-baseurl",
+            "wireFormat": "anthropic"
+          }
+        ]
+      },
+      "because": "JSON.parse keeps the escape \\ud800 as a lone surrogate in a JavaScript string, and the library holds strings as UTF-8, which cannot carry one, so spisor_parse_json decodes it as U+FFFD and the label reads \"Lone \\ufffd label\" where basekit's reads \"Lone \\ud800 label\""
+    },
+    {
+      "case": "unpaired-surrogate-escape",
+      "call": 1,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "app": {
+          "id": "lone",
+          "label": "Lone \ufffd label",
+          "home": {
+            "candidates": [
+              "~/.lone"
+            ]
+          },
+          "detect": {
+            "binary": "lone",
+            "pkg": ""
+          },
+          "commandsSubdir": "commands",
+          "paths": {
+            "repos": "repos",
+            "plugin": "plugin",
+            "cache": "cache",
+            "config": "config"
+          },
+          "proxyPort": 0,
+          "integration": "env-baseurl",
+          "wireFormat": "anthropic"
+        }
+      },
+      "because": "JSON.parse keeps the escape \\ud800 as a lone surrogate in a JavaScript string, and the library holds strings as UTF-8, which cannot carry one, so spisor_parse_json decodes it as U+FFFD and the label reads \"Lone \\ufffd label\" where basekit's reads \"Lone \\ud800 label\""
+    },
+    {
+      "case": "integration-unknown-literal",
+      "call": 0,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "apps": [
+          {
+            "id": "alpha",
+            "label": "Alpha CLI",
+            "home": {
+              "envOverride": "HUB_ALPHA_DIR",
+              "nativeEnv": "ALPHA_CONFIG_DIR",
+              "candidates": [
+                "~/.alpha",
+                "~/.config/alpha"
+              ]
+            },
+            "detect": {
+              "binary": "alpha",
+              "pkg": "alpha-cli"
+            },
+            "loader": {
+              "id": "alpha-loader",
+              "url": "acme-org/alpha-loader"
+            },
+            "commandsSubdir": "commands",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 40001,
+            "integration": "env-baseurl",
+            "wireFormat": "anthropic",
+            "usage": {
+              "formats": [
+                "alpha-jsonl"
+              ]
+            }
+          },
+          {
+            "id": "beta",
+            "label": "Beta CLI",
+            "home": {
+              "envOverride": "HUB_BETA_DIR",
+              "nativeEnv": "BETA_CONFIG_DIR",
+              "xdgSubdir": "beta",
+              "candidates": [
+                "~/.config/beta",
+                "~/.beta"
+              ]
+            },
+            "detect": {
+              "binary": "beta",
+              "pkg": "beta-cli"
+            },
+            "commandsSubdir": "command",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 40002,
+            "integration": {
+              "refused": true
+            },
+            "wireFormat": "anthropic"
+          }
+        ]
+      },
+      "because": "AppDescriptor.integration is the enum AppIntegration, whose literals are env-baseurl and native, so the seam answers every other property of the descriptor and its integration() getter throws a PluginException naming apps and apps.list, where TypeScript passes the string \"Native\" through"
+    },
+    {
+      "case": "integration-unknown-literal",
+      "call": 1,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "app": {
+          "id": "beta",
+          "label": "Beta CLI",
+          "home": {
+            "envOverride": "HUB_BETA_DIR",
+            "nativeEnv": "BETA_CONFIG_DIR",
+            "xdgSubdir": "beta",
+            "candidates": [
+              "~/.config/beta",
+              "~/.beta"
+            ]
+          },
+          "detect": {
+            "binary": "beta",
+            "pkg": "beta-cli"
+          },
+          "commandsSubdir": "command",
+          "paths": {
+            "repos": "repos",
+            "plugin": "plugin",
+            "cache": "cache",
+            "config": "config"
+          },
+          "proxyPort": 40002,
+          "integration": {
+            "refused": true
+          },
+          "wireFormat": "anthropic"
+        }
+      },
+      "because": "AppDescriptor.integration is the enum AppIntegration, whose literals are env-baseurl and native, so the seam answers every other property of the descriptor and its integration() getter throws a PluginException naming apps and apps.get, where TypeScript passes the string \"Native\" through"
+    },
+    {
+      "case": "proxy-port-not-an-integer",
+      "call": 0,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "apps": [
+          {
+            "id": "alpha",
+            "label": "Alpha CLI",
+            "home": {
+              "envOverride": "HUB_ALPHA_DIR",
+              "nativeEnv": "ALPHA_CONFIG_DIR",
+              "candidates": [
+                "~/.alpha",
+                "~/.config/alpha"
+              ]
+            },
+            "detect": {
+              "binary": "alpha",
+              "pkg": "alpha-cli"
+            },
+            "loader": {
+              "id": "alpha-loader",
+              "url": "acme-org/alpha-loader"
+            },
+            "commandsSubdir": "commands",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": {
+              "refused": true
+            },
+            "integration": "env-baseurl",
+            "wireFormat": "anthropic",
+            "usage": {
+              "formats": [
+                "alpha-jsonl"
+              ]
+            }
+          },
+          {
+            "id": "beta",
+            "label": "Beta CLI",
+            "home": {
+              "envOverride": "HUB_BETA_DIR",
+              "nativeEnv": "BETA_CONFIG_DIR",
+              "xdgSubdir": "beta",
+              "candidates": [
+                "~/.config/beta",
+                "~/.beta"
+              ]
+            },
+            "detect": {
+              "binary": "beta",
+              "pkg": "beta-cli"
+            },
+            "commandsSubdir": "command",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 40002,
+            "integration": "native",
+            "wireFormat": "anthropic"
+          }
+        ]
+      },
+      "because": "AppDescriptor.proxyPort is an int and the registry holds the string \"x\", so the seam answers every other property of the descriptor and its proxyPort() getter throws a PluginException naming apps and apps.list, where TypeScript passes the string through"
+    },
+    {
+      "case": "proxy-port-not-an-integer",
+      "call": 1,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "app": {
+          "id": "alpha",
+          "label": "Alpha CLI",
+          "home": {
+            "envOverride": "HUB_ALPHA_DIR",
+            "nativeEnv": "ALPHA_CONFIG_DIR",
+            "candidates": [
+              "~/.alpha",
+              "~/.config/alpha"
+            ]
+          },
+          "detect": {
+            "binary": "alpha",
+            "pkg": "alpha-cli"
+          },
+          "loader": {
+            "id": "alpha-loader",
+            "url": "acme-org/alpha-loader"
+          },
+          "commandsSubdir": "commands",
+          "paths": {
+            "repos": "repos",
+            "plugin": "plugin",
+            "cache": "cache",
+            "config": "config"
+          },
+          "proxyPort": {
+            "refused": true
+          },
+          "integration": "env-baseurl",
+          "wireFormat": "anthropic",
+          "usage": {
+            "formats": [
+              "alpha-jsonl"
+            ]
+          }
+        }
+      },
+      "because": "AppDescriptor.proxyPort is an int and the registry holds the string \"x\", so the seam answers every other property of the descriptor and its proxyPort() getter throws a PluginException naming apps and apps.get, where TypeScript passes the string through"
     }
   ]
 }

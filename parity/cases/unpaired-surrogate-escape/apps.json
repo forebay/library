@@ -1,0 +1,14 @@
+{
+  "lone": {
+    "id": "lone",
+    "label": "Lone \ud800 label",
+    "home": {
+      "candidates": [
+        "~/.lone"
+      ]
+    },
+    "detect": {
+      "binary": "lone"
+    }
+  }
+}

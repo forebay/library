@@ -121,9 +121,14 @@ its `case.json` places), an environment, a home layout, an argument vector and a
   generated from `library.json`, reading each answer through the getters a Java plugin calls.
 - `parity/divergences.json` lists every answer that is not basekit's, with its reason. Each is held
   both ways: the implementation must answer what the table records and basekit must answer something
-  else. Beside the library's own divergences above, two are the Java host's: a Java data interface
-  cannot tell a `null` optional field from an absent one, and Gson reads a number into a `String`
-  property as a string.
+  else. Beside the library's own divergences above, which include an unpaired surrogate escape
+  read as U+FFFD, the rest are the Java host's: a Java data interface cannot tell a `null` optional
+  field from an absent one, Gson reads a number into a `String` property as a string, and a getter
+  whose value its type cannot hold (an unknown enum literal, a string `proxyPort`) refuses while
+  the descriptor's other getters answer. The Java driver observes such a getter as
+  `{"refused": true}`.
+- `parity/oracle.mjs` hands basekit the case's environment with `process.env`'s matching on the
+  platform it runs on, which on Windows ignores case.
 
 The siblings are checked out under `siblings/` (CI pins each to a commit; locally a link to each
 checkout does):
