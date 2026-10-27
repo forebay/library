@@ -104,7 +104,7 @@ static char *path_name(const path_kind *kind, const cJSON *declared, const apps_
         if (candidates[index] == NULL) {
             continue;
         }
-        char *trimmed = apps_trim(candidates[index]);
+        char *trimmed = spisor_javascript_trim(candidates[index]);
         if (trimmed == NULL || is_single_segment(trimmed)) {
             return trimmed;
         }
@@ -131,7 +131,11 @@ static int add_copy(cJSON *descriptor, const char *name, const cJSON *value) {
         return 1;
     }
     cJSON *copy = cJSON_Duplicate(value, 1);
-    return copy != NULL && cJSON_AddItemToObject(descriptor, name, copy);
+    if (copy == NULL || !cJSON_AddItemToObject(descriptor, name, copy)) {
+        cJSON_Delete(copy);
+        return 0;
+    }
+    return 1;
 }
 
 static int add_declared(cJSON *descriptor, const cJSON *entry, const char *const *names, size_t count) {
@@ -233,7 +237,7 @@ static int append_entry(cJSON *apps, const cJSON *entry, const apps_facts *facts
 }
 
 cJSON *apps_build(const apps_facts *facts, apps_error *error) {
-    cJSON *registry = apps_read_registry(facts);
+    cJSON *registry = apps_read_registry(facts, error);
     cJSON *apps = cJSON_CreateArray();
     size_t count = 0;
     ordered_entry *entries = registry == NULL ? NULL : entries_in_order(registry, &count);

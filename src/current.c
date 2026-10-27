@@ -15,14 +15,6 @@ static void lowercase_ascii(char *text) {
     }
 }
 
-static char *lowercased(const char *text) {
-    char *copy = apps_copy(text);
-    if (copy != NULL) {
-        lowercase_ascii(copy);
-    }
-    return copy;
-}
-
 static int is_token_character(char character) {
     return (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9');
 }
@@ -84,11 +76,11 @@ static const cJSON *argument_hit(const cJSON *apps, const apps_facts *facts, app
                        "make detect.binary in the registry an executable name");
             break;
         }
-        char *wanted = lowercased(binary->valuestring);
+        char *wanted = apps_copy_or_raise(binary->valuestring, error);
         if (wanted == NULL) {
-            apps_raise_out_of_memory(error);
             break;
         }
+        lowercase_ascii(wanted);
         if (hit == NULL && has_token(argv, wanted)) {
             hit = app;
         }
@@ -106,7 +98,7 @@ static const cJSON *environment_hit(const cJSON *apps, const apps_facts *facts, 
         if (!apps_is_truthy(native)) {
             continue;
         }
-        char *key = apps_to_property_key(native);
+        char *key = spisor_javascript_string(native);
         char *value = key == NULL ? NULL : apps_trimmed_environment(facts, key, error);
         free(key);
         if (value == NULL) {
@@ -122,11 +114,12 @@ static const cJSON *environment_hit(const cJSON *apps, const apps_facts *facts, 
 }
 
 /** basekit's normalizePath: backslashes become slashes, trailing slashes go, and the rest is lowercased. */
-static char *normalized_path(const char *path) {
-    char *normal = lowercased(path);
+static char *normalized_path(const char *path, apps_error *error) {
+    char *normal = apps_copy_or_raise(path, error);
     if (normal == NULL) {
         return NULL;
     }
+    lowercase_ascii(normal);
     for (char *cursor = normal; *cursor != '\0'; cursor++) {
         if (*cursor == '\\') {
             *cursor = '/';
@@ -150,8 +143,8 @@ static int ends_with(const char *text, const char *suffix) {
     return text_length >= suffix_length && strcmp(text + text_length - suffix_length, suffix) == 0;
 }
 
-static int prefix_match(const char *forced, const char *candidate) {
-    char *normal_candidate = normalized_path(candidate);
+static int prefix_match(const char *forced, const char *candidate, apps_error *error) {
+    char *normal_candidate = normalized_path(candidate, error);
     int matched = normal_candidate != NULL && forced[0] != '\0' && normal_candidate[0] != '\0' &&
                   (strcmp(forced, normal_candidate) == 0 || starts_below(forced, normal_candidate) ||
                    starts_below(normal_candidate, forced));
@@ -163,8 +156,8 @@ static int any_candidate_matches(const char *forced, const cJSON *app, const app
     size_t count = 0;
     char **candidates = apps_expand_candidates(app, facts, &count, error);
     int matched = 0;
-    for (size_t index = 0; candidates != NULL && !matched && index < count; index++) {
-        matched = prefix_match(forced, candidates[index]);
+    for (size_t index = 0; candidates != NULL && !matched && !error->raised && index < count; index++) {
+        matched = prefix_match(forced, candidates[index], error);
     }
     apps_free_strings(candidates, count);
     return matched;
@@ -181,54 +174,64 @@ static int xdg_suffix_matches(const char *forced, const cJSON *app, apps_error *
                    "make home.xdgSubdir in the registry a directory name");
         return 0;
     }
-    char *lowered = lowercased(subdirectory->valuestring);
-    char *suffix = lowered == NULL ? NULL : apps_join("/", lowered);
-    int matched = suffix != NULL && ends_with(forced, suffix);
+    char *suffix = apps_join("/", subdirectory->valuestring);
+    if (suffix == NULL) {
+        apps_raise_out_of_memory(error);
+        return 0;
+    }
+    lowercase_ascii(suffix);
+    int matched = ends_with(forced, suffix);
     free(suffix);
-    free(lowered);
     return matched;
 }
 
-static int last_segment_names(const char *forced, const cJSON *app) {
+static int last_segment_names(const char *forced, const cJSON *app, apps_error *error) {
     if (!apps_is_truthy(apps_home_member(app, "nativeEnv"))) {
         return 0;
     }
+    char *id = apps_copy_or_raise(apps_descriptor_id(app), error);
+    if (id == NULL) {
+        return 0;
+    }
+    lowercase_ascii(id);
     const char *slash = strrchr(forced, '/');
-    char *id = lowercased(apps_descriptor_id(app));
-    int matched = id != NULL && strcmp(slash == NULL ? forced : slash + 1, id) == 0;
+    int matched = strcmp(slash == NULL ? forced : slash + 1, id) == 0;
     free(id);
     return matched;
 }
 
-/** basekit's forcedDirMatchesApp, with forced already normalised. */
+/** basekit's forcedDirMatchesApp, with forced already normalised; never true once error is raised. */
 static int forced_directory_matches(const char *forced, const cJSON *app, const apps_facts *facts, apps_error *error) {
-    if (any_candidate_matches(forced, app, facts, error) || error->raised) {
-        return !error->raised;
+    int matched = any_candidate_matches(forced, app, facts, error);
+    if (!matched && !error->raised) {
+        matched = xdg_suffix_matches(forced, app, error);
     }
-    if (xdg_suffix_matches(forced, app, error) || error->raised) {
-        return !error->raised;
+    if (!matched && !error->raised) {
+        matched = last_segment_names(forced, app, error);
     }
-    return last_segment_names(forced, app);
+    return matched && !error->raised;
 }
 
 static const cJSON *forced_directory_hit(const cJSON *apps, const apps_facts *facts, apps_error *error) {
     char *forced = apps_trimmed_environment(facts, "HUB_CONFIG_DIR", error);
-    char *normal = forced == NULL ? NULL : normalized_path(forced);
+    if (forced == NULL || forced[0] == '\0') {
+        free(forced);
+        return NULL;
+    }
+    char *normal = normalized_path(forced, error);
+    free(forced);
     const cJSON *hit = NULL;
-    if (forced != NULL && forced[0] != '\0') {
-        const cJSON *app = NULL;
-        cJSON_ArrayForEach(app, apps) {
-            if (normal == NULL) {
-                apps_raise_out_of_memory(error);
-            }
-            if (error->raised || forced_directory_matches(normal, app, facts, error)) {
-                hit = error->raised ? NULL : app;
-                break;
-            }
+    const cJSON *app = NULL;
+    cJSON_ArrayForEach(app, apps) {
+        if (normal == NULL || error->raised) {
+            break;
+        }
+        if (forced_directory_matches(normal, app, facts, error)) {
+            hit = app;
+            break;
         }
     }
     free(normal);
-    free(forced);
     return hit;
 }
 

@@ -8,7 +8,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 include(FetchContent)
 FetchContent_Declare(spisor_library
     GIT_REPOSITORY https://github.com/spisor/library.git
-    GIT_TAG 04ea2c83cc0efc27669ee4303e0bbbcf4dfcfc17)
+    GIT_TAG e048e09e743ae7d924ad5b33af48c4d3bc436644)
 FetchContent_MakeAvailable(spisor_library)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -22,7 +22,6 @@ add_library(apps SHARED
     src/javascript.c
     src/registry.c
     src/registry_text.c
-    src/strict_json.c
     src/support.c)
 target_link_libraries(apps PRIVATE spisor_library)
 set_target_properties(apps PROPERTIES C_VISIBILITY_PRESET hidden)

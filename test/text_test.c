@@ -59,6 +59,13 @@ static void strips_a_comment_led_by_javascript_whitespace(void) {
     expect_ids(&ranged, "k", "a space from U+2000 to U+200A and a BOM before a comment");
 }
 
+/** The regex's \s spans line feeds, so a match starting on an earlier blank line eats what JSON.parse would refuse. */
+static void strips_non_json_whitespace_on_lines_before_a_comment(void) {
+    support_answer answer = list_text("{\n\v\n\t\f\n// eaten with the lines above\n" ENTRY("k", "K") "}");
+    expect_ids(&answer, "k", "vertical tab and form feed on lines before a comment");
+    expect_empty(list_text("{\n\v\n" ENTRY("k", "K") "}"), "the same whitespace with no comment after it");
+}
+
 static void refuses_whitespace_json_parse_does_not_know(void) {
     expect_empty(list_text("\v{" ENTRY("k", "K") "}"), "vertical tab");
     expect_empty(list_text("{\f" ENTRY("k", "K") "}"), "form feed");
@@ -147,6 +154,7 @@ int main(void) {
     starts_a_comment_line_after_a_line_separator_inside_a_string();
     keeps_a_line_separator_inside_a_string();
     strips_a_comment_led_by_javascript_whitespace();
+    strips_non_json_whitespace_on_lines_before_a_comment();
     refuses_whitespace_json_parse_does_not_know();
     reads_a_comment_holding_invalid_utf8_or_nul();
     refuses_a_raw_nul_outside_a_comment();
