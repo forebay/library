@@ -1,0 +1,10 @@
+{
+  "kit": {
+    "label": "Kit",
+    "home": {
+      "candidates": [
+        "~/.kit"
+      ]
+    }
+  }
+}

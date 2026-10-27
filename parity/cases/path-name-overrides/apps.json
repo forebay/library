@@ -1,0 +1,24 @@
+{
+  "declared": {
+    "label": "Declared",
+    "home": {
+      "candidates": [
+        "~/.d"
+      ]
+    },
+    "paths": {
+      "repos": "  r  ",
+      "plugin": "p",
+      "cache": null,
+      "config": 5
+    }
+  },
+  "undeclared": {
+    "label": "Undeclared",
+    "home": {
+      "candidates": [
+        "~/.u"
+      ]
+    }
+  }
+}

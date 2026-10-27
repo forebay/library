@@ -1,0 +1,12 @@
+{
+  "numbered": {
+    "label": "Numbered",
+    "home": {
+      "envOverride": 5,
+      "nativeEnv": 1.5,
+      "candidates": [
+        "~/.p"
+      ]
+    }
+  }
+}

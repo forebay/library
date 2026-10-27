@@ -1,0 +1,136 @@
+{
+  "divergences": [
+    {
+      "case": "lowercase-non-ascii-config-dir",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "id": ""
+      },
+      "because": "the library lowercases ASCII only, and basekit lowercases with JavaScript toLowerCase, so a HUB_CONFIG_DIR differing from a candidate only in the case of a non-ASCII letter (U+00C4 against U+00E4) matches there and not here"
+    },
+    {
+      "case": "lowercase-kelvin-sign-argv",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "id": ""
+      },
+      "because": "JavaScript lowercases the Kelvin sign U+212A to an ASCII k, so basekit reads an argv token kit where the library, lowercasing ASCII only, reads a separator and the token it"
+    },
+    {
+      "case": "lowercase-dotted-capital-i-argv",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "id": ""
+      },
+      "because": "JavaScript lowercases U+0130 to i followed by U+0307, so basekit reads an argv token i where the library, lowercasing ASCII only, reads a separator"
+    },
+    {
+      "case": "escaped-nul",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "apps": []
+      },
+      "because": "JSON.parse reads the escape \u0000 into a string, and cJSON cannot carry a NUL inside one, so spisor_parse_json refuses the registry and the library answers it as malformed"
+    },
+    {
+      "case": "deep-nesting",
+      "call": 0,
+      "implementations": [
+        "typescript",
+        "java"
+      ],
+      "answer": {
+        "apps": []
+      },
+      "because": "cJSON refuses nesting deeper than 1000 levels, which JSON.parse reads, so the library answers the registry as malformed"
+    },
+    {
+      "case": "null-optional-kept",
+      "call": 0,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "apps": [
+          {
+            "id": "kept",
+            "label": "Kept",
+            "home": {
+              "candidates": [
+                "~/.k"
+              ]
+            },
+            "detect": {
+              "binary": "kept",
+              "pkg": ""
+            },
+            "commandsSubdir": "commands",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 0,
+            "integration": "env-baseurl",
+            "wireFormat": "anthropic",
+            "accent": "#123456"
+          }
+        ]
+      },
+      "because": "a Java data interface answers null for an optional property that is JSON null and for one that is absent alike, so a plugin cannot observe basekit's icon: null or loader: null"
+    },
+    {
+      "case": "candidate-not-a-string",
+      "call": 0,
+      "implementations": [
+        "java"
+      ],
+      "answer": {
+        "apps": [
+          {
+            "id": "zeta",
+            "label": "Zeta",
+            "home": {
+              "candidates": [
+                "5",
+                "~/.zeta"
+              ]
+            },
+            "detect": {
+              "binary": "zeta",
+              "pkg": ""
+            },
+            "commandsSubdir": "commands",
+            "paths": {
+              "repos": "repos",
+              "plugin": "plugin",
+              "cache": "cache",
+              "config": "config"
+            },
+            "proxyPort": 0,
+            "integration": "env-baseurl",
+            "wireFormat": "anthropic"
+          }
+        ]
+      },
+      "because": "AppHome.candidates is a List<String> and Gson reads the number 5 into it as the string \"5\", so a Java plugin observes a string where basekit answers the registry's number"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+import type { LibraryPin } from "@weivel/typescript/host";
+
+/** The released apps library the parity suite holds to basekit, pinned by digest. */
+export const APPS_PIN: LibraryPin = {
+  repository: "forebay/library",
+  tag: "v0.1.1",
+  sha256: {
+    "library.json": "420e0f66f8b82b5ec4704c87089ec79caf9475e68262bd1b5878e079faefa2f6",
+    "linux-x64": "511a24739c7f05ff3c58d32171c42b3ee3c5bf840afad074aeaeba7d4d77f2cd",
+    "win32-x64": "ecc2616750b6f1168c127ddf3619b9d46e06c4e47078155681558e565e5c5f0d",
+  },
+};
+
+/** The released libraries the parity host loads. */
+export const PARITY_PINS: readonly LibraryPin[] = [APPS_PIN];

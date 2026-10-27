@@ -1,0 +1,14 @@
+{
+  "environment": {},
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/usr/bin/Kit"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

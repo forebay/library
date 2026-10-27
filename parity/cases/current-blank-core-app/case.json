@@ -1,0 +1,16 @@
+{
+  "environment": {
+    "CORE_APP": "   "
+  },
+  "homeLayout": [],
+  "arguments": [
+    "/usr/bin/node",
+    "/opt/BETA/run"
+  ],
+  "calls": [
+    {
+      "function": "current",
+      "argument": {}
+    }
+  ]
+}

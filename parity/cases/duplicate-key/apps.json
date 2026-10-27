@@ -1,0 +1,5 @@
+{
+  "alpha": { "label": "First", "home": { "candidates": ["~/.first"] } },
+  "beta": { "label": "Beta", "home": { "candidates": ["~/.beta"] } },
+  "alpha": { "label": "Second", "home": { "candidates": ["~/.second"] } }
+}

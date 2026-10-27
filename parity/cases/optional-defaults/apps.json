@@ -1,0 +1,11 @@
+{
+  "gamma": {
+    "id": "gamma",
+    "label": "Gamma",
+    "home": {
+      "candidates": [
+        "{home}/.gamma"
+      ]
+    }
+  }
+}
