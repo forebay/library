@@ -40,6 +40,25 @@ final class ParityCases {
         return new ParityCases(Paths.get(System.getProperty("parity.directory")).toAbsolutePath().normalize());
     }
 
+    /** {@code PARITY_CASES} points a driver at another case set, which is how the suite is shown to refuse an empty one. */
+    private Path casesDirectory() {
+        String override = System.getenv("PARITY_CASES");
+        return override == null || override.isEmpty() ? parityDirectory.resolve("cases") : Paths.get(override).toAbsolutePath().normalize();
+    }
+
+    /** How many calls the case files declare, counted apart from any run so a run that skips one is caught. */
+    int declaredCallCount(List<String> names) throws IOException {
+        int calls = 0;
+        for (String name : names) {
+            calls += parse(casesDirectory().resolve(name).resolve("case.json")).getAsJsonObject().getAsJsonArray("calls").size();
+        }
+        return calls;
+    }
+
+    JsonObject pin() throws IOException {
+        return parse(parityDirectory.resolve("pin.json")).getAsJsonObject();
+    }
+
     Path workDirectory(String driver) {
         return parityDirectory.resolve("work").resolve(driver);
     }
@@ -117,10 +136,6 @@ final class ParityCases {
             return object;
         }
         return value;
-    }
-
-    private Path casesDirectory() {
-        return parityDirectory.resolve("cases");
     }
 
     private static Map<String, String> registryFiles(Path caseDirectory, JsonObject definition) {
